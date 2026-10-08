@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام تسيير المتوسطة</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f3f6fa;
+    color:#1f2937;
+}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+
+.sidebar{
+    position:fixed;
+    right:0;
+    top:0;
+    width:250px;
+    height:100vh;
+    background:#172554;
+    color:white;
+    padding:20px 15px;
+    z-index:10;
+}
+.logo{
+    font-size:21px;
+    font-weight:bold;
+    text-align:center;
+    padding:15px 5px 25px;
+}
+.nav button{
+    width:100%;
+    border:0;
+    background:transparent;
+    color:#dbeafe;
+    padding:13px;
+    margin:4px 0;
+    border-radius:10px;
+    text-align:right;
+    font-size:15px;
+}
+.nav button:hover,.nav button.active{
+    background:#2563eb;
+    color:white;
+}
+
+.main{
+    margin-right:250px;
+    padding:25px;
+}
+
+.topbar{
+    background:white;
+    padding:18px 22px;
+    border-radius:14px;
+    margin-bottom:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 2px 8px #0000000d;
+}
+.topbar h1{margin:0;font-size:23px}
+.date{color:#64748b;font-size:14px}
+
+.page{display:none}
+.page.active{display:block}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:25px;
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 2px 8px #0000000d;
+}
+.card .number{
+    font-size:30px;
+    font-weight:bold;
+    color:#2563eb;
+    margin-top:8px;
+}
+.card .label{color:#64748b}
+
+.panel{
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px #0000000d;
+}
+
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+}
+.panel-header h2{margin:0;font-size:18px}
+
+.primary{
+    border:0;
+    background:#2563eb;
+    color:white;
+    padding:10px 15px;
+    border-radius:9px;
+}
+.primary:hover{background:#1d4ed8}
+
+.danger{
+    border:0;
+    background:#dc2626;
+    color:white;
+    padding:7px 10px;
+    border-radius:7px;
+}
+.edit{
+    border:0;
+    background:#f59e0b;
+    color:white;
+    padding:7px 10px;
+    border-radius:7px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+th,td{
+    padding:12px 10px;
+    border-bottom:1px solid #e5e7eb;
+    text-align:right;
+}
+th{
+    background:#f8fafc;
+    color:#475569;
+}
+tr:hover td{background:#f8fafc}
+
+.search{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#0008;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+}
+.modal.show{display:flex}
+.modal-box{
+    background:white;
+    width:min(550px,92%);
+    max-height:90vh;
+    overflow:auto;
+    border-radius:15px;
+    padding:25px;
+}
+.modal-box h2{margin-top:0}
+.form-group{margin-bottom:14px}
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:bold;
+}
+.form-group input,.form-group select{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+}
+.modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+.cancel{
+    border:0;
+    background:#e5e7eb;
+    padding:10px 15px;
+    border-radius:8px;
+}
+
+.toast{
+    position:fixed;
+    bottom:25px;
+    left:25px;
+    background:#16a34a;
+    color:white;
+    padding:13px 18px;
+    border-radius:9px;
+    display:none;
+    z-index:100;
+}
+.toast.show{display:block}
+
+.empty{
+    text-align:center;
+    padding:30px;
+    color:#64748b;
+}
+
+@media(max-width:900px){
+    .sidebar{
+        width:200px;
+    }
+    .main{
+        margin-right:200px;
+    }
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:650px){
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+    .main{
+        margin-right:0;
+        padding:12px;
+    }
+    .nav{
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+    }
+    .cards{
+        grid-template-columns:1fr 1fr;
+    }
+    .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+    table{
+        min-width:650px;
+    }
+    .table-wrapper{
+        overflow-x:auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="logo">🏫 نظام تسيير المتوسطة</div>
+
+    <div class="nav">
+        <button class="active" onclick="showPage('dashboard',this)">📊 لوحة التحكم</button>
+        <button onclick="showPage('students',this)">👨‍🎓 التلاميذ</button>
+        <button onclick="showPage('classes',this)">🏫 الأقسام</button>
+        <button onclick="showPage('teachers',this)">👨‍🏫 الأساتذة</button>
+        <button onclick="showPage('attendance',this)">📅 الغيابات</button>
+        <button onclick="showPage('grades',this)">📝 النقاط</button>
+    </div>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+    <h1 id="pageTitle">لوحة التحكم</h1>
+    <div class="date" id="today"></div>
+</header>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+
+    <div class="cards">
+        <div class="card">
+            <div class="label">عدد التلاميذ</div>
+            <div class="number" id="studentCount">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">عدد الأقسام</div>
+            <div class="number" id="classCount">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">عدد الأساتذة</div>
+            <div class="number" id="teacherCount">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">الغيابات</div>
+            <div class="number" id="absenceCount">0</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>آخر التلاميذ المضافين</h2>
+            <button class="primary" onclick="openStudentModal()">+ إضافة تلميذ</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>القسم</th>
+                        <th>الجنس</th>
+                    </tr>
+                </thead>
+                <tbody id="recentStudents"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- STUDENTS -->
+<section id="students" class="page">
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>إدارة التلاميذ</h2>
+            <button class="primary" onclick="openStudentModal()">+ إضافة تلميذ</button>
+        </div>
+
+        <input
+            class="search"
+            placeholder="🔎 البحث عن تلميذ..."
+            oninput="renderStudents(this.value)"
+        >
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الاسم واللقب</th>
+                        <th>القسم</th>
+                        <th>الجنس</th>
+                        <th>تاريخ الميلاد</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- CLASSES -->
+<section id="classes" class="page">
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>إدارة الأقسام</h2>
+            <button class="primary" onclick="openClassModal()">+ إضافة قسم</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>القسم</th>
+                        <th>المستوى</th>
+                        <th>عدد التلاميذ</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="classesTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- TEACHERS -->
+<section id="teachers" class="page">
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>إدارة الأساتذة</h2>
+            <button class="primary" onclick="openTeacherModal()">+ إضافة أستاذ</button>
+        </div>
+
+        <input
+            class="search"
+            placeholder="🔎 البحث عن أستاذ..."
+            oninput="renderTeachers(this.value)"
+        >
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الاسم واللقب</th>
+                        <th>المادة</th>
+                        <th>رقم الهاتف</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- ATTENDANCE -->
+<section id="attendance" class="page">
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>تسجيل الغيابات</h2>
+            <button class="primary" onclick="openAttendanceModal()">+ تسجيل غياب</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>التلميذ</th>
+                        <th>التاريخ</th>
+                        <th>السبب</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- GRADES -->
+<section id="grades" class="page">
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>النقاط</h2>
+            <button class="primary" onclick="openGradeModal()">+ إضافة نقطة</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>التلميذ</th>
+                        <th>المادة</th>
+                        <th>النقطة</th>
+                        <th>التاريخ</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="gradesTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+</main>
+
+<!-- STUDENT MODAL -->
+<div class="modal" id="studentModal">
+<div class="modal-box">
+
+<h2 id="studentModalTitle">إضافة تلميذ</h2>
+
+<input type="hidden" id="studentId">
+
+<div class="form-group">
+<label>الاسم واللقب</label>
+<input id="studentName" placeholder="مثال: محمد بن أحمد">
+</div>
+
+<div class="form-group">
+<label>القسم</label>
+<select id="studentClass"></select>
+</div>
+
+<div class="form-group">
+<label>الجنس</label>
+<select id="studentGender">
+<option value="ذكر">ذكر</option>
+<option value="أنثى">أنثى</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>تاريخ الميلاد</label>
+<input type="date" id="studentBirth">
+</div>
+
+<div class="modal-actions">
+<button class="primary" onclick="saveStudent()">حفظ</button>
+<button class="cancel" onclick="closeModal('studentModal')">إلغاء</button>
+</div>
+
+</div>
+</div>
+
+<!-- CLASS MODAL -->
+<div class="modal" id="classModal">
+<div class="modal-box">
+
+<h2>إضافة قسم</h2>
+
+<div class="form-group">
+<label>اسم القسم</label>
+<input id="className" placeholder="مثال: 3 متوسط 1">
+</div>
+
+<div class="form-group">
+<label>المستوى</label>
+<select id="classLevel">
+<option>1 متوسط</option>
+<option>2 متوسط</option>
+<option>3 متوسط</option>
+<option>4 متوسط</option>
+</select>
+</div>
+
+<div class="modal-actions">
+<button class="primary" onclick="saveClass()">حفظ</button>
+<button class="cancel" onclick="closeModal('classModal')">إلغاء</button>
+</div>
+
+</div>
+</div>
+
+<!-- TEACHER MODAL -->
+<div class="modal" id="teacherModal">
+<div class="modal-box">
+
+<h2>إضافة أستاذ</h2>
+
+<div class="form-group">
+<label>الاسم واللقب</label>
+<input id="teacherName" placeholder="مثال: أحمد محمد">
+</div>
+
+<div class="form-group">
+<label>المادة</label>
+<input id="teacherSubject" placeholder="مثال: الرياضيات">
+</div>
+
+<div class="form-group">
+<label>رقم الهاتف</label>
+<input id="teacherPhone" placeholder="05xxxxxxxx">
+</div>
+
+<div class="modal-actions">
+<button class="primary" onclick="saveTeacher()">حفظ</button>
+<button class="cancel" onclick="closeModal('teacherModal')">إلغاء</button>
+</div>
+
+</div>
+</div>
+
+<!-- ATTENDANCE MODAL -->
+<div class="modal" id="attendanceModal">
+<div class="modal-box">
+
+<h2>تسجيل غياب</h2>
+
+<div class="form-group">
+<label>التلميذ</label>
+<select id="attendanceStudent"></select>
+</div>
+
+<div class="form-group">
+<label>التاريخ</label>
+<input type="date" id="attendanceDate">
+</div>
+
+<div class="form-group">
+<label>السبب</label>
+<input id="attendanceReason" placeholder="مثال: مرض">
+</div>
+
+<div class="modal-actions">
+<button class="primary" onclick="saveAttendance()">حفظ</button>
+<button class="cancel" onclick="closeModal('attendanceModal')">إلغاء</button>
+</div>
+
+</div>
+</div>
+
+<!-- GRADE MODAL -->
+<div class="modal" id="gradeModal">
+<div class="modal-box">
+
+<h2>إضافة نقطة</h2>
+
+<div class="form-group">
+<label>التلميذ</label>
+<select id="gradeStudent"></select>
+</div>
+
+<div class="form-group">
+<label>المادة</label>
+<input id="gradeSubject" placeholder="مثال: الرياضيات">
+</div>
+
+<div class="form-group">
+<label>النقطة / 20</label>
+<input type="number" id="gradeValue" min="0" max="20" step="0.25">
+</div>
+
+<div class="modal-actions">
+<button class="primary" onclick="saveGrade()">حفظ</button>
+<button class="cancel" onclick="closeModal('gradeModal')">إلغاء</button>
+</div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+let students = JSON.parse(localStorage.getItem("students") || "[]");
+let classes = JSON.parse(localStorage.getItem("classes") || "[]");
+let teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+let attendance = JSON.parse(localStorage.getItem("attendance") || "[]");
+let grades = JSON.parse(localStorage.getItem("grades") || "[]");
+
+function saveData(){
+    localStorage.setItem("students",JSON.stringify(students));
+    localStorage.setItem("classes",JSON.stringify(classes));
+    localStorage.setItem("teachers",JSON.stringify(teachers));
+    localStorage.setItem("attendance",JSON.stringify(attendance));
+    localStorage.setItem("grades",JSON.stringify(grades));
+}
+
+function id(){
+    return Date.now().toString() + Math.random().toString(16).slice(2);
+}
+
+function toast(message){
+    const t=document.getElementById("toast");
+    t.textContent=message;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+function showPage(page,btn){
+
+    document.querySelectorAll(".page").forEach(p=>{
+        p.classList.remove("active");
+    });
+
+    document.getElementById(page).classList.add("active");
+
+    document.querySelectorAll(".nav button").forEach(b=>{
+        b.classList.remove("active");
+    });
+
+    btn.classList.add("active");
+
+    const titles={
+        dashboard:"لوحة التحكم",
+        students:"التلاميذ",
+        classes:"الأقسام",
+        teachers:"الأساتذة",
+        attendance:"الغيابات",
+        grades:"النقاط"
+    };
+
+    document.getElementById("pageTitle").textContent=titles[page];
+}
+
+function closeModal(id){
+    document.getElementById(id).classList.remove("show");
+}
+
+function openStudentModal(editId=null){
+
+    document.getElementById("studentId").value="";
+    document.getElementById("studentName").value="";
+    document.getElementById("studentBirth").value="";
+
+    populateClassSelect();
+
+    if(editId){
+        const s=students.find(x=>x.id===editId);
+
+        if(s){
+            document.getElementById("studentModalTitle").textContent="تعديل تلميذ";
+            document.getElementById("studentId").value=s.id;
+            document.getElementById("studentName").value=s.name;
+            document.getElementById("studentClass").value=s.classId;
+            document.getElementById("studentGender").value=s.gender;
+            document.getElementById("studentBirth").value=s.birth || "";
+        }
+    }else{
+        document.getElementById("studentModalTitle").textContent="إضافة تلميذ";
+    }
+
+    document.getElementById("studentModal").classList.add("show");
+}
+
+function populateClassSelect(){
+
+    const select=document.getElementById("studentClass");
+
+    select.innerHTML="";
+
+    classes.forEach(c=>{
+        const option=document.createElement("option");
+        option.value=c.id;
+        option.textContent=c.name;
+        select.appendChild(option);
+    });
+}
+
+function saveStudent(){
+
+    const name=document.getElementById("studentName").value.trim();
+    const classId=document.getElementById("studentClass").value;
+    const gender=document.getElementById("studentGender").value;
+    const birth=document.getElementById("studentBirth").value;
+    const studentId=document.getElementById("studentId").value;
+
+    if(!name){
+        alert("أدخل اسم التلميذ");
+        return;
+    }
+
+    if(!classId){
+        alert("أضف قسمًا أولًا");
+        return;
+    }
+
+    if(studentId){
+
+        const s=students.find(x=>x.id===studentId);
+
+        if(s){
+            s.name=name;
+            s.classId=classId;
+            s.gender=gender;
+            s.birth=birth;
+        }
+
+        toast("تم تعديل التلميذ");
+
+    }else{
+
+        students.push({
+            id:id(),
+            name,
+            classId,
+            gender,
+            birth,
+            createdAt:new Date().toISOString()
+        });
+
+        toast("تمت إضافة التلميذ");
+    }
+
+    saveData();
+    closeModal("studentModal");
+    renderAll();
+}
+
+function renderStudents(search=""){
+
+    const tbody=document.getElementById("studentsTable");
+
+    let list=students.filter(s=>
+        s.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    tbody.innerHTML="";
+
+    if(!list.length){
+        tbody.innerHTML=<tr><td colspan="5" class="empty">لا توجد بيانات</td></tr>;
+        return;
+    }
+
+    list.forEach(s=>{
+
+        const c=classes.find(x=>x.id===s.classId);
+
+        tbody.innerHTML+=`
+        <tr>
+            <td>${escapeHtml(s.name)}</td>
+            <td>${c ? escapeHtml(c.name) : "-"}</td>
+            <td>${s.gender}</td>
+            <td>${s.birth || "-"}</td>
+            <td>
+                <button class="edit" onclick="openStudentModal('${s.id}')">تعديل</button>
+                <button class="danger" onclick="deleteStudent('${s.id}')">حذف</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function deleteStudent(studentId){
+
+    if(!confirm("هل تريد حذف هذا التلميذ؟")) return;
+
+    students=students.filter(s=>s.id!==studentId);
+
+    attendance=attendance.filter(a=>a.studentId!==studentId);
+    grades=grades.filter(g=>g.studentId!==studentId);
+
+    saveData();
+    renderAll();
+
+    toast("تم حذف التلميذ");
+}
+
+function openClassModal(){
+    document.getElementById("className").value="";
+    document.getElementById("classModal").classList.add("show");
+}
+
+function saveClass(){
+
+    const name=document.getElementById("className").value.trim();
+    const level=document.getElementById("classLevel").value;
+
+    if(!name){
+        alert("أدخل اسم القسم");
+        return;
+    }
+
+    classes.push({
+        id:id(),
+        name,
+        level
+    });
+
+    saveData();
+    closeModal("classModal");
+    renderAll();
+
+    toast("تمت إضافة القسم");
+}
+
+function renderClasses(){
+
+    const tbody=document.getElementById("classesTable");
+
+    tbody.innerHTML="";
+
+    if(!classes.length){
+        tbody.innerHTML=<tr><td colspan="4" class="empty">لا توجد أقسام</td></tr>;
+        return;
+    }
+
+    classes.forEach(c=>{
+
+        const count=students.filter(s=>s.classId===c.id).length;
+
+        tbody.innerHTML+=`
+        <tr>
+            <td>${escapeHtml(c.name)}</td>
+            <td>${c.level}</td>
+            <td>${count}</td>
+            <td>
+                <button class="danger" onclick="deleteClass('${c.id}')">حذف</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function deleteClass(classId){
+
+    const count=students.filter(s=>s.classId===classId).length;
+
+    if(count>0){
+        alert("لا يمكن حذف قسم يحتوي على تلاميذ");
+        return;
+    }
+
+    if(!confirm("هل تريد حذف القسم؟")) return;
+
+    classes=classes.filter(c=>c.id!==classId);
+
+    saveData();
+    renderAll();
+
+    toast("تم حذف القسم");
+}
+
+function openTeacherModal(){
+
+    document.getElementById("teacherName").value="";
+    document.getElementById("teacherSubject").value="";
+    document.getElementById("teacherPhone").value="";
+
+    document.getElementById("teacherModal").classList.add("show");
+}
+
+function saveTeacher(){
+
+    const name=document.getElementById("teacherName").value.trim();
+    const subject=document.getElementById("teacherSubject").value.trim();
+    const phone=document.getElementById("teacherPhone").value.trim();
+
+    if(!name || !subject){
+        alert("أدخل اسم الأستاذ والمادة");
+        return;
+    }
+
+    teachers.push({
+        id:id(),
+        name,
+        subject,
+        phone
+    });
+
+    saveData();
+    closeModal("teacherModal");
+    renderAll();
+
+    toast("تمت إضافة الأستاذ");
+}
+
+function renderTeachers(search=""){
+
+    const tbody=document.getElementById("teachersTable");
+
+    let list=teachers.filter(t=>
+        t.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    tbody.innerHTML="";
+
+    if(!list.length){
+        tbody.innerHTML=<tr><td colspan="4" class="empty">لا توجد بيانات</td></tr>;
+        return;
+    }
+
+    list.forEach(t=>{
+
+        tbody.innerHTML+=`
+        <tr>
+            <td>${escapeHtml(t.name)}</td>
+            <td>${escapeHtml(t.subject)}</td>
+            <td>${escapeHtml(t.phone || "-")}</td>
+            <td>
+                <button class="danger" onclick="deleteTeacher('${t.id}')">حذف</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function deleteTeacher(teacherId){
+
+    if(!confirm("هل تريد حذف الأستاذ؟")) return;
+
+    teachers=teachers.filter(t=>t.id!==teacherId);
+
+    saveData();
+    renderAll();
+
+    toast("تم حذف الأستاذ");
+}
+
+function openAttendanceModal(){
+
+    populateStudentSelect("attendanceStudent");
+
+    document.getElementById("attendanceDate").value=
+        new Date().toISOString().split("T")[0];
+
+    document.getElementById("attendanceReason").value="";
+
+    document.getElementById("attendanceModal").classList.add("show");
+}
+
+function populateStudentSelect(elementId){
+
+    const select=document.getElementById(elementId);
+
+    select.innerHTML="";
+
+    students.forEach(s=>{
+
+        const option=document.createElement("option");
+
+        option.value=s.id;
+        option.textContent=s.name;
+
+        select.appendChild(option);
+    });
+}
+
+function saveAttendance(){
+
+    const studentId=document.getElementById("attendanceStudent").value;
+    const date=document.getElementById("attendanceDate").value;
+    const reason=document.getElementById("attendanceReason").value.trim();
+
+    if(!studentId){
+        alert("أضف تلاميذ أولًا");
+        return;
+    }
+
+    attendance.push({
+        id:id(),
+        studentId,
+        date,
+        reason
+    });
+
+    saveData();
+    closeModal("attendanceModal");
+    renderAll();
+
+    toast("تم تسجيل الغياب");
+}
+
+function renderAttendance(){
+
+    const tbody=document.getElementById("attendanceTable");
+
+    tbody.innerHTML="";
+
+    if(!attendance.length){
+        tbody.innerHTML=<tr><td colspan="4" class="empty">لا توجد غيابات</td></tr>;
+        return;
+    }
+
+    attendance.forEach(a=>{
+
+        const student=students.find(s=>s.id===a.studentId);
+
+        tbody.innerHTML+=`
+        <tr>
+            <td>${student ? escapeHtml(student.name) : "-"}</td>
+            <td>${a.date}</td>
+            <td>${escapeHtml(a.reason || "-")}</td>
+            <td>
+                <button class="danger" onclick="deleteAttendance('${a.id}')">حذف</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function deleteAttendance(attendanceId){
+
+    if(!confirm("حذف الغياب؟")) return;
+
+    attendance=attendance.filter(a=>a.id!==attendanceId);
+
+    saveData();
+    renderAll();
+
+    toast("تم حذف الغياب");
+}
+
+function openGradeModal(){
+
+    populateStudentSelect("gradeStudent");
+
+    document.getElementById("gradeSubject").value="";
+    document.getElementById("gradeValue").value="";
+
+    document.getElementById("gradeModal").classList.add("show");
+}
+
+function saveGrade(){
+
+    const studentId=document.getElementById("gradeStudent").value;
+    const subject=document.getElementById("gradeSubject").value.trim();
+    const value=Number(document.getElementById("gradeValue").value);
+
+    if(!studentId || !subject){
+        alert("أكمل البيانات");
+        return;
+    }
+
+    if(value<0 || value>20 || isNaN(value)){
+        alert("النقطة يجب أن تكون بين 0 و20");
+        return;
+    }
+
+    grades.push({
+        id:id(),
+        studentId,
+        subject,
+        value,
+        date:new Date().toISOString().split("T")[0]
+    });
+
+    saveData();
+    closeModal("gradeModal");
+    renderAll();
+
+    toast("تمت إضافة النقطة");
+}
+
+function renderGrades(){
+
+    const tbody=document.getElementById("gradesTable");
+
+    tbody.innerHTML="";
+
+    if(!grades.length){
+        tbody.innerHTML=<tr><td colspan="5" class="empty">لا توجد نقاط</td></tr>;
+        return;
+    }
+
+    grades.forEach(g=>{
+
+        const student=students.find(s=>s.id===g.studentId);
+
+        tbody.innerHTML+=`
+        <tr>
+            <td>${student ? escapeHtml(student.name) : "-"}</td>
+            <td>${escapeHtml(g.subject)}</td>
+            <td><strong>${g.value}/20</strong></td>
+            <td>${g.date}</td>
+            <td>
+                <button class="danger" onclick="deleteGrade('${g.id}')">حذف</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function deleteGrade(gradeId){
+
+    if(!confirm("حذف النقطة؟")) return;
+
+    grades=grades.filter(g=>g.id!==gradeId);
+
+    saveData();
+    renderAll();
+
+    toast("تم حذف النقطة");
+}
+
+function updateDashboard(){
+
+    document.getElementById("studentCount").textContent=students.length;
+    document.getElementById("classCount").textContent=classes.length;
+    document.getElementById("teacherCount").textContent=teachers.length;
+    document.getElementById("absenceCount").textContent=attendance.length;
+
+    const tbody=document.getElementById("recentStudents");
+
+    tbody.innerHTML="";
+
+    const recent=[...students].reverse().slice(0,5);
+
+    if(!recent.length){
+        tbody.innerHTML=<tr><td colspan="3" class="empty">لا توجد بيانات</td></tr>;
+        return;
+    }
+
+    recent.forEach(s=>{
+
+        const c=classes.find(x=>x.id===s.classId);
+
+        tbody.innerHTML+=`
+        <tr>
+            <td>${escapeHtml(s.name)}</td>
+            <td>${c ? escapeHtml(c.name) : "-"}</td>
+            <td>${s.gender}</td>
+        </tr>`;
+    });
+}
+
+function renderAll(){
+
+    updateDashboard();
+    renderStudents();
+    renderClasses();
+    renderTeachers();
+    renderAttendance();
+    renderGrades();
+    populateClassSelect();
+}
+
+function escapeHtml(text){
+
+    return String(text ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+document.getElementById("today").textContent=
+    new Date().toLocaleDateString("ar-DZ",{
+        weekday:"long",
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+    });
+
+renderAll();
+
+</script>
+
+</body>
+</html>
